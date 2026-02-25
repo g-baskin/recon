@@ -14,6 +14,17 @@ Recon runs a 5-phase pipeline on any target you give it:
 | 4 | **Pre-Launch Gate** | Full checklist before shipping — security, performance, legal, rollback |
 | 5 | **IP Protection** | Protect your proprietary logic, operational security, legal protection |
 
+## Features
+
+- **Configurable depth** — `--quick` for surface-level scans, `--deep` (default) for the full pipeline
+- **Phase selection** — run only the phases you need with `--phases 1,2`
+- **File output** — full reports saved to `recon-reports/` directory, not just printed to chat
+- **Multiple export formats** — Markdown (default), JSON, or CSV
+- **Diff mode** — re-run on the same target and see what changed since last scan
+- **Auto comparison matrix** — side-by-side table when scanning 2+ targets
+- **Target type detection** — auto-detects SaaS, open source, API, mobile app, CLI tool, etc. and adjusts research accordingly
+- **Parallel execution** — launches multiple research agents simultaneously for speed
+
 ## Installation
 
 Copy the skill folder into your Claude Code skills directory:
@@ -40,41 +51,75 @@ cp -r /path/to/recon/skills/recon .claude/skills/recon
 
 ## Usage
 
-### Full protocol (all 5 phases)
+### Full scan (default — all 5 phases, deep)
 ```
 /recon https://competitor1.com https://competitor2.com
 ```
 
-### Research only (phases 1-2)
+### Quick scan (phase 1 only, surface-level)
 ```
-Run phases 1-2 on [product name]
-```
-
-### Build hardening (phases 3-5)
-```
-Run phases 3-5 on our implementation
+/recon --quick https://competitor.com
 ```
 
-### Single phase
+### Specific phases only
 ```
-Run phase 4
-```
-
-### Ad-hoc research
-```
-I just saw [tool/website] — what is this? Full breakdown.
+/recon --phases 1,2 https://competitor.com
 ```
 
-## How It Works
+### Build hardening (phases 3-5, for your own project)
+```
+/recon --phases 3,4,5
+```
 
-Recon uses Claude Code's parallel agent system to maximize throughput:
+### Re-run with diff (compare to previous scan)
+```
+/recon --diff https://competitor.com
+```
 
-- Launches multiple research agents simultaneously (one per target per phase)
-- Uses WebSearch for broad discovery
-- Uses WebFetch for deep website content extraction
-- Searches Reddit, GitHub, Hacker News for community sentiment
-- Cross-references findings across targets for comparative analysis
-- Delivers a structured report with evidence, recommendations, and priority levels
+### JSON or CSV output
+```
+/recon --format json https://competitor.com
+/recon --format csv https://competitor.com
+```
+
+### Combined flags
+```
+/recon --quick --format json https://competitor.com
+/recon --deep --diff --phases 1,2 https://competitor.com
+```
+
+### Natural language (also works)
+```
+I just saw [tool/website/product] — what is this? Full breakdown.
+```
+
+## Output
+
+Reports are saved to your project directory:
+
+```
+recon-reports/
+├── competitor-name/
+│   ├── RECON_REPORT.md          # Full report
+│   ├── RECON_REPORT.json        # Structured data (if --format json)
+│   ├── comparison.csv           # Tables (if --format csv)
+│   ├── metadata.json            # Run metadata (date, flags, target type)
+│   ├── DIFF_REPORT.md           # Changes since last scan (if --diff)
+│   └── previous/               # Previous reports for diffing
+└── COMPARISON_MATRIX.md         # Cross-target comparison (multiple targets)
+```
+
+A condensed summary is also printed to chat with pointers to the full report files.
+
+## Flags Reference
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--quick` | Surface-level scan (phase 1 only) | Off |
+| `--deep` | Full 5-phase pipeline | On |
+| `--phases 1,2,3` | Run specific phases | All |
+| `--format md\|json\|csv` | Output format | `md` |
+| `--diff` | Compare against previous scan | Off |
 
 ## Requirements
 

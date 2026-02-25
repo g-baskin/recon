@@ -2,7 +2,7 @@
 name: recon
 description: Run competitive intelligence reconnaissance on targets — tears through websites, APIs, tech stacks, communities, infrastructure, domains, IPs, emails, open ports, and stores findings in the project
 user-invocable: true
-argument-hint: <target URLs or product names>
+argument-hint: "[--quick|--deep] [--phases 1,2,3] [--format md|json|csv] [--diff] <target URLs or product names>"
 allowed-tools: Bash, Read, Write, Glob, Grep, WebFetch, WebSearch, Task
 ---
 
@@ -11,7 +11,7 @@ allowed-tools: Bash, Read, Write, Glob, Grep, WebFetch, WebSearch, Task
 > **Author:** Greg Baskin ([github.com/g-baskin](https://github.com/g-baskin))
 > **License:** GPL-3.0
 
-When the user mentions websites, tools, software, products, or competitors they want investigated — or says anything like "run the protocol," "research this," "tear this apart," "investigate these," "act as a hacker," or names specific URLs/products to analyze — execute this full 5-phase pipeline. **Do NOT summarize early. Go deep on every phase before moving to the next.**
+When the user mentions websites, tools, software, products, or competitors they want investigated — or says anything like "run the protocol," "research this," "tear this apart," "investigate these," "act as a hacker," or names specific URLs/products to analyze — execute this pipeline. **Do NOT summarize early. Go deep on every phase before moving to the next.**
 
 Use parallel agents (Task tool with subagent_type=general-purpose or Explore) to maximize throughput. Launch multiple research agents simultaneously for each target.
 
@@ -25,6 +25,220 @@ Activate this protocol when the user says any of:
 - "Can we build something like this?"
 - "Leave no stone unturned"
 - Or names specific URLs/products/tools/software to analyze
+
+---
+
+## FLAGS & OPTIONS
+
+Parse the user's input for these flags. If not provided, use defaults.
+
+### Depth Control
+
+| Flag | Behavior | Default |
+|------|----------|---------|
+| `--quick` | Phase 1 only, surface-level scan. Business overview, basic tech stack, top competitors. Skip deep OSINT, security, and IP phases. | No |
+| `--deep` | Full 5-phase pipeline. Leave no stone unturned. | Yes (default) |
+| (no flag) | Full 5-phase pipeline | Yes |
+
+### Phase Selection
+
+| Flag | Behavior | Example |
+|------|----------|---------|
+| `--phases 1,2` | Run only specified phases | `--phases 1,2` for research only |
+| `--phases 3,4,5` | Run only specified phases | `--phases 3,4,5` for build hardening |
+| (no flag) | Run all phases (or phase 1 only if `--quick`) | All 5 phases |
+
+### Output Format
+
+| Flag | Behavior | Default |
+|------|----------|---------|
+| `--format md` | Markdown report (default) | Yes |
+| `--format json` | Structured JSON output | No |
+| `--format csv` | CSV tables for spreadsheet import | No |
+| (no flag) | Markdown | Yes |
+
+### Diff Mode
+
+| Flag | Behavior |
+|------|----------|
+| `--diff` | Compare against previous recon report for the same target. Highlight what changed: new funding, team growth, tech stack shifts, feature additions/removals, pricing changes. |
+
+---
+
+## TARGET TYPE DETECTION
+
+Before starting research, auto-detect the target type and adjust the research approach:
+
+| Target Type | Detection Signals | Adjusted Approach |
+|-------------|-------------------|-------------------|
+| **SaaS Product** | Has pricing page, login/signup, app subdomain | Full pipeline — pricing analysis, user reviews, API docs |
+| **Open Source Project** | GitHub repo, no pricing, community-driven | Focus on GitHub stars/forks, contributors, ecosystem, adoption |
+| **API Service** | Developer docs, API keys, SDKs | Focus on API design, rate limits, pricing per call, DX |
+| **Mobile App** | App Store / Play Store listing | Include app store reviews, download metrics, mobile tech stack |
+| **CLI Tool** | npm/pip/brew install, terminal-focused | Focus on GitHub, package registry stats, CLI comparison |
+| **Hardware/IoT** | Physical product, shipping | Include supply chain, manufacturing, certifications |
+| **Marketplace/Platform** | Two-sided (buyers + sellers) | Analyze both sides, network effects, take rate |
+
+Apply the detected type throughout all phases to ask the right questions and skip irrelevant ones (e.g., don't search App Store reviews for a CLI tool).
+
+---
+
+## OUTPUT & FILE STORAGE
+
+**All findings MUST be written to files, not just printed to chat.**
+
+### File Structure
+
+For each recon run, create a report directory in the current project:
+
+```
+recon-reports/
+├── [target-name]/
+│   ├── RECON_REPORT.md          # Full structured report (markdown)
+│   ├── RECON_REPORT.json        # Structured data (if --format json)
+│   ├── comparison.csv           # Comparison matrix (if --format csv or multiple targets)
+│   ├── metadata.json            # Run metadata (date, flags, phases, target type)
+│   └── previous/               # Previous reports (for --diff mode)
+│       └── RECON_REPORT_2026-02-24.md
+└── COMPARISON_MATRIX.md         # Cross-target comparison (if multiple targets)
+```
+
+### metadata.json Format
+
+```json
+{
+  "target": "https://competitor.com",
+  "target_name": "competitor",
+  "target_type": "saas",
+  "run_date": "2026-02-24T19:30:00Z",
+  "flags": {
+    "depth": "deep",
+    "phases": [1, 2, 3, 4, 5],
+    "format": "md",
+    "diff": false
+  },
+  "phases_completed": [1, 2, 3, 4, 5],
+  "previous_runs": ["2026-01-15", "2025-12-01"]
+}
+```
+
+### Report Writing Rules
+
+1. **Always write to file first**, then print a summary to chat
+2. Chat summary should be a condensed version (key findings, top recommendations, comparison highlights) with a pointer to the full report file
+3. If `--format json` is specified, write both `.md` and `.json` versions
+4. If `--format csv` is specified, write `.md` plus `.csv` tables for key data (pricing, features, tech stack)
+5. For `--diff` mode: check `recon-reports/[target]/previous/` for prior reports, move current report to `previous/` with date suffix, then write new report and a `DIFF_REPORT.md` highlighting changes
+
+### Chat Summary Template
+
+After writing the full report, print to chat:
+
+```
+## Recon Complete: [Target Name]
+
+**Target Type:** [SaaS / Open Source / API / etc.]
+**Phases Run:** [1-5]
+**Depth:** [Quick / Deep]
+
+### Key Findings
+- [Top 3-5 bullet points]
+
+### Top Recommendations
+- [CRITICAL] ...
+- [HIGH] ...
+
+### Full report saved to:
+`recon-reports/[target-name]/RECON_REPORT.md`
+```
+
+---
+
+## COMPARISON MATRIX (Multiple Targets)
+
+When 2+ targets are provided, auto-generate a comparison matrix after all individual reports are complete.
+
+### Comparison Dimensions
+
+| Dimension | What to Compare |
+|-----------|-----------------|
+| **Product** | Core features, unique selling points, target audience |
+| **Pricing** | Free tier, paid tiers, enterprise, per-seat vs. flat |
+| **Tech Stack** | Frontend, backend, database, infrastructure |
+| **Team** | Size, funding, key hires, growth signals |
+| **Community** | GitHub stars, Reddit mentions, Discord size, NPS signals |
+| **Gaps** | User complaints, missing features, pain points |
+| **Moat** | What's hard to replicate, switching costs, network effects |
+| **Opportunity** | Where we can differentiate, underserved segments |
+
+### Output Format
+
+Write to `recon-reports/COMPARISON_MATRIX.md`:
+
+```markdown
+# Competitive Comparison Matrix
+
+| Dimension | Target A | Target B | Target C | Our Opportunity |
+|-----------|----------|----------|----------|-----------------|
+| Core Product | ... | ... | ... | ... |
+| Pricing | ... | ... | ... | ... |
+| Tech Stack | ... | ... | ... | ... |
+| Team Size | ... | ... | ... | ... |
+| Funding | ... | ... | ... | ... |
+| Community | ... | ... | ... | ... |
+| Key Gap | ... | ... | ... | ... |
+| Moat | ... | ... | ... | ... |
+
+## Detailed Analysis
+[Narrative comparison with recommendations]
+```
+
+---
+
+## DIFF MODE (Re-run & Compare)
+
+When `--diff` is used, or when a previous report exists for the same target:
+
+### Diff Process
+
+1. Check `recon-reports/[target]/` for existing `RECON_REPORT.md`
+2. If found, move it to `recon-reports/[target]/previous/RECON_REPORT_[date].md`
+3. Run the full recon as normal
+4. Compare new findings against previous report
+5. Generate `DIFF_REPORT.md` highlighting changes
+
+### Change Categories
+
+| Category | What Changed | Signal |
+|----------|-------------|--------|
+| **Funding** | New round, acquisition, revenue milestone | Growth / pivot |
+| **Team** | Key hires, departures, new roles posted | Expansion / contraction |
+| **Product** | New features, removed features, pricing changes | Strategy shift |
+| **Tech Stack** | New frameworks, infrastructure changes | Technical investment |
+| **Community** | Growth/decline in mentions, sentiment shift | Market position |
+| **Competitive** | New competitors entered, others exited | Market dynamics |
+
+### Diff Report Format
+
+```markdown
+# Recon Diff: [Target Name]
+**Previous scan:** [date]
+**Current scan:** [date]
+
+## Changes Detected
+
+### New
+- [Things that didn't exist before]
+
+### Changed
+- [Things that were different before] (was: X, now: Y)
+
+### Removed
+- [Things that existed before but are gone]
+
+### Unchanged
+- [Key things that stayed the same — stability signals]
+```
 
 ---
 
@@ -68,6 +282,13 @@ Act as a competitive intelligence analyst with hacker-level curiosity. For EACH 
 - Reddit search for mentions in relevant subreddits
 - GitHub search for their org name
 - Crunchbase / PitchBook via web search
+
+**Quick Mode (--quick):** For phase 1 in quick mode, cover only:
+- Product overview (1-2 paragraphs)
+- Pricing summary
+- Top 3 competitors
+- Basic tech stack (from job postings or obvious signals)
+- Skip: Wayback Machine, deep community research, OSINT, funding deep-dive
 
 ---
 
@@ -223,24 +444,49 @@ Return a structured report with clear sections for each phase:
 - Risk assessment where applicable
 - Comparison matrix if multiple targets
 
+**Always write the full report to `recon-reports/[target-name]/RECON_REPORT.md`** and print a condensed summary to chat.
+
 ---
 
 ## HOW TO INVOKE
 
-**Full protocol (all 5 phases):**
-> `/recon https://competitor1.com https://competitor2.com`
+**Full protocol (all 5 phases, deep):**
+```
+/recon https://competitor1.com https://competitor2.com
+```
 
-**Research only (phases 1-2):**
-> "Run phases 1-2 on [product name]"
+**Quick scan (phase 1 only, surface-level):**
+```
+/recon --quick https://competitor.com
+```
 
-**Build hardening (phases 3-5):**
-> "Run phases 3-5 on our implementation"
+**Specific phases:**
+```
+/recon --phases 1,2 https://competitor.com
+```
 
-**Single phase:**
-> "Run phase 4" (pre-launch gate only)
-> "Check our secret sauce" (phase 5 only)
+**Build hardening only:**
+```
+/recon --phases 3,4,5
+```
 
-**Ad-hoc research:**
+**Re-run with diff (compare to previous scan):**
+```
+/recon --diff https://competitor.com
+```
+
+**JSON output:**
+```
+/recon --format json https://competitor.com
+```
+
+**Combined flags:**
+```
+/recon --quick --format json https://competitor.com
+/recon --deep --diff --phases 1,2 https://competitor.com
+```
+
+**Natural language (still works):**
 > "I just saw [tool/website/product] — what is this? Full breakdown."
 > Triggers phases 1-2 automatically
 
@@ -254,4 +500,6 @@ Return a structured report with clear sections for each phase:
 - Use Reddit MCP or WebSearch for community sentiment
 - Use GitHub search for code discovery
 - Cross-reference findings between targets for comparative analysis
-- Compile all findings into a single structured report before presenting
+- Write all findings to `recon-reports/` directory
+- Print condensed summary to chat with file path references
+- For `--diff` mode, load previous report and generate change analysis

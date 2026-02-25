@@ -9,7 +9,7 @@ allowed-tools: Bash, Read, Write, Glob, Grep, WebFetch, WebSearch, Task
 # Recon — Deep Competitive Intelligence & Build Protocol
 
 > **Author:** Greg Baskin ([github.com/g-baskin](https://github.com/g-baskin))
-> **License:** MIT
+> **License:** GPL-3.0
 
 When the user mentions websites, tools, software, products, or competitors they want investigated — or says anything like "run the protocol," "research this," "tear this apart," "investigate these," "act as a hacker," or names specific URLs/products to analyze — execute this full 5-phase pipeline. **Do NOT summarize early. Go deep on every phase before moving to the next.**
 

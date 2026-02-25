@@ -84,8 +84,10 @@ Recon uses Claude Code's parallel agent system to maximize throughput:
 
 ## License
 
-MIT License - Copyright (c) 2026 AutomationGod
+GPL-3.0 License - Copyright (c) 2026 AutomationGod
 
 See [LICENSE](LICENSE) for details.
 
-Attribution appreciated: if you use or adapt this skill, a link back to this repo is welcome.
+If you modify or redistribute this skill, you must:
+- Keep the original copyright and credit
+- Share your modifications under GPL-3.0

@@ -274,14 +274,57 @@ Act as a competitive intelligence analyst with hacker-level curiosity. For EACH 
 - User complaints — what's missing? Where are the gaps? What do people hate?
 - Switching costs — how hard is it to leave their product?
 
-**Research Tools to Use (in parallel):**
+**Research Sources (use in parallel — leave no stone unturned):**
+
+*Core platforms:*
 - WebSearch for each target name + variations
 - WebFetch on their main site, about page, pricing page, docs, blog
 - WebFetch on Wayback Machine snapshots: `https://web.archive.org/web/*/targeturl.com`
 - WebSearch for "[target] review," "[target] alternative," "[target] funding"
+- GitHub search for their org name, repos, SDKs, open-source components
 - Reddit search for mentions in relevant subreddits
-- GitHub search for their org name
-- Crunchbase / PitchBook via web search
+- Hacker News — search via WebSearch for `site:news.ycombinator.com [target]`
+- Twitter/X — search for mentions, founder accounts, community sentiment
+- LinkedIn — founder profiles, team size, job postings, company page
+
+*Community & forums:*
+- Indie Hackers — founder stories, milestone posts, revenue transparency
+- Product Hunt — launch history, upvotes, maker comments, featured collections
+- Discord servers — many products have public Discords with real user feedback
+- Slack communities — industry-specific groups (Demand Curve, SaaS Twitter, etc.)
+- StackOverflow — questions about their API/SDK, developer adoption signals
+
+*Review & comparison sites:*
+- G2, Capterra, Trustpilot — verified user reviews and ratings
+- GetLatka — SaaS revenue/metrics database
+- SimilarWeb — traffic estimates, referral sources, growth trends
+- Crunchbase / PitchBook / Wellfound (AngelList) — funding, team, investors
+
+*Tech stack detection:*
+- BuiltWith / Wappalyzer — tech stack fingerprinting
+- npm / PyPI / crates.io / Docker Hub — published packages and libraries
+- WHOIS / DNS records — domain age, hosting provider, infrastructure changes
+- SSL certificate transparency logs — subdomain discovery
+
+*Content & media:*
+- YouTube — conference talks, demos, founder interviews, tutorials
+- Medium / Substack / dev.to — founder blog posts, technical write-ups
+- Podcasts (search Spotify, Apple Podcasts) — founder interviews
+- SlideShare / Speaker Deck — architecture talks, pitch decks
+
+*Team & culture intel:*
+- Glassdoor / Levels.fyi — salaries, culture reviews, internal complaints
+- Wellfound (AngelList) — startup profiles, team bios, open roles
+- LinkedIn job postings — reveals tech stack, growth areas, priorities
+
+*Post-mortem & case study sites:*
+- Failory — startup post-mortems, failure analysis
+- Startup Obituary — shutdown announcements, cause of death
+- Starter Story — detailed founder interviews with revenue numbers
+- Famewall — customer testimonial case studies
+
+*Mobile (if applicable):*
+- App Store / Play Store — reviews, ratings, download estimates, version history
 
 **Quick Mode (--quick):** For phase 1 in quick mode, cover only:
 - Product overview (1-2 paragraphs)
@@ -326,12 +369,17 @@ Act as a senior engineer doing a full technical teardown. For EACH target:
 - What's commodity (auth, payments, CRUD) vs. truly novel?
 
 **Open Source Intelligence (OSINT):**
-- Developer blog posts explaining architecture decisions
-- Conference talks by their engineers (search YouTube, SlideShare)
+- Developer blog posts explaining architecture decisions (Medium, Substack, dev.to)
+- Conference talks by their engineers (YouTube, SlideShare, Speaker Deck)
 - Technical write-ups, postmortems, architecture diagrams
 - Dependencies in any public package files (package.json, requirements.txt, etc.)
 - BuiltWith, Wappalyzer, or similar for tech stack fingerprinting
 - DNS records, SSL certificate info, WHOIS data
+- npm / PyPI / crates.io / Docker Hub — published packages
+- Podcast appearances by founders or engineers (Spotify, Apple Podcasts)
+- Glassdoor / Levels.fyi — job postings reveal internal tech stack and priorities
+- Indie Hackers / Starter Story — founders sometimes share full tech stack details
+- SSL certificate transparency logs — subdomain and service discovery
 
 **Feasibility Assessment:**
 - Can we build each one? Estimated complexity (MVP vs. full parity)?
@@ -503,3 +551,40 @@ Return a structured report with clear sections for each phase:
 - Write all findings to `recon-reports/` directory
 - Print condensed summary to chat with file path references
 - For `--diff` mode, load previous report and generate change analysis
+
+### Research Source Priority Order
+
+For each target, research agents should hit sources in this priority order:
+
+**Tier 1 — Always check (core intelligence):**
+- Target website (main, pricing, about, docs, blog, changelog)
+- GitHub (org repos, open-source components, SDKs)
+- Reddit (subreddit mentions, r/SaaS, r/startups, niche subreddits)
+- Hacker News (launches, discussions, Show HN posts)
+- Twitter/X (founder account, product account, mentions)
+- LinkedIn (company page, founder profile, job postings)
+- Crunchbase (funding, team, investors)
+
+**Tier 2 — High-value secondary sources:**
+- Product Hunt (launch history, upvotes, reviews)
+- G2 / Capterra / Trustpilot (verified user reviews)
+- Indie Hackers (founder stories, revenue milestones)
+- Wayback Machine (site evolution, pivots, removed features)
+- BuiltWith / Wappalyzer (tech stack detection)
+- SimilarWeb (traffic, referrals, growth trends)
+- GetLatka (SaaS revenue data)
+
+**Tier 3 — Deep research (for --deep mode):**
+- YouTube (conference talks, demos, founder interviews)
+- Medium / Substack / dev.to (technical blog posts)
+- Podcasts (founder interviews on Spotify, Apple Podcasts)
+- SlideShare / Speaker Deck (architecture presentations)
+- Glassdoor / Levels.fyi (culture, salaries, internal complaints)
+- Wellfound / AngelList (startup profile, team, open roles)
+- StackOverflow (developer adoption, API questions)
+- Discord / Slack communities (real-time user feedback)
+- npm / PyPI / Docker Hub (published packages)
+- DNS / WHOIS / SSL transparency logs (infrastructure intel)
+- Failory / Startup Obituary (post-mortems if applicable)
+- Starter Story / Famewall (founder interviews, case studies)
+- App Store / Play Store (if mobile — reviews, downloads, version history)

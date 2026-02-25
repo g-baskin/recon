@@ -10,7 +10,7 @@ Recon runs a 5-phase pipeline on any target you give it:
 |-------|------|----------------|
 | 1 | **Full Reconnaissance** | Business intel, web presence, funding, team, competitive landscape |
 | 2 | **Technical Reverse Engineering** | Tech stack, APIs, architecture, open source, OSINT, feasibility |
-| 3 | **Security Architecture** | Data protection, auth, infrastructure hardening, compliance, threat modeling |
+| 3 | **Security Architecture** | Modular compliance profiles (GDPR, HIPAA, PCI, SOC 2, ISO 27001, FedRAMP, + 10 more) with shared security foundation |
 | 4 | **Pre-Launch Gate** | Full checklist before shipping — security, performance, legal, rollback |
 | 5 | **IP Protection** | Protect your proprietary logic, operational security, legal protection |
 
@@ -23,6 +23,7 @@ Recon runs a 5-phase pipeline on any target you give it:
 - **Diff mode** — re-run on the same target and see what changed since last scan
 - **Auto comparison matrix** — side-by-side table when scanning 2+ targets
 - **Target type detection** — auto-detects SaaS, open source, API, mobile app, CLI tool, etc. and adjusts research accordingly
+- **Compliance profiles** — 16 individual frameworks + 6 preset bundles (saas, healthcare, fintech, government, startup, enterprise)
 - **Parallel execution** — launches multiple research agents simultaneously for speed
 
 ## Installation
@@ -69,6 +70,19 @@ cp -r /path/to/recon/skills/recon .claude/skills/recon
 ### Build hardening (phases 3-5, for your own project)
 ```
 /recon --phases 3,4,5
+```
+
+### Compliance scan (specific frameworks)
+```
+/recon --phases 3 --compliance hipaa
+/recon --phases 3 --compliance gdpr,hipaa,pci
+```
+
+### Compliance bundles (preset profiles)
+```
+/recon --compliance healthcare
+/recon --compliance fintech
+/recon --compliance saas https://competitor.com
 ```
 
 ### Re-run with diff (compare to previous scan)
@@ -120,6 +134,50 @@ A condensed summary is also printed to chat with pointers to the full report fil
 | `--phases 1,2,3` | Run specific phases | All |
 | `--format md\|json\|csv` | Output format | `md` |
 | `--diff` | Compare against previous scan | Off |
+| `--compliance [profile]` | Compliance profile for Phase 3 | `gdpr,soc2,owasp` |
+
+## Compliance Profiles
+
+Phase 3 uses modular compliance profiles. Pick individual frameworks, use a preset bundle, or combine with commas.
+
+### Individual Profiles
+
+| Profile | Framework | Scope |
+|---------|-----------|-------|
+| `gdpr` | GDPR | EU data privacy |
+| `ccpa` | CCPA/CPRA | California consumer privacy |
+| `hipaa` | HIPAA + HITRUST | Healthcare / PHI |
+| `pci` | PCI DSS | Payment card data |
+| `soc2` | SOC 2 Type II | B2B SaaS trust criteria |
+| `iso27001` | ISO 27001 | Enterprise ISMS |
+| `fedramp` | FedRAMP + NIST 800-53 | US government cloud |
+| `nist` | NIST CSF | Cybersecurity risk framework |
+| `cmmc` | CMMC | Defense contractors |
+| `sox` | SOX | Financial reporting integrity |
+| `glba` | GLBA | Consumer financial data |
+| `owasp` | OWASP ASVS + Top 10 | Application security verification |
+| `cis` | CIS Benchmarks | Infrastructure hardening |
+| `lgpd` | LGPD | Brazilian data protection |
+| `pipeda` | PIPEDA | Canadian privacy |
+| `popia` | POPIA | South African data protection |
+
+### Preset Bundles
+
+| Bundle | Includes |
+|--------|----------|
+| `saas` | SOC 2 + GDPR + CCPA + OWASP |
+| `healthcare` | HIPAA + HITRUST + SOC 2 + GDPR |
+| `fintech` | PCI DSS + SOC 2 + GLBA + GDPR |
+| `government` | FedRAMP + NIST 800-53 + CMMC |
+| `startup` | OWASP Top 10 + GDPR + basic SOC 2 prep |
+| `enterprise` | ISO 27001 + SOC 2 + GDPR + CCPA + CIS |
+| `all` | Every framework |
+
+### Custom Combos
+
+```
+/recon --compliance gdpr,hipaa,pci
+```
 
 ## Requirements
 
